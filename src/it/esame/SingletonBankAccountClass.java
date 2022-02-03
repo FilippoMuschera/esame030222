@@ -8,18 +8,27 @@ public class SingletonBankAccountClass {
     private double balance = 3000;
     private TransactionType lastTransactionType = TransactionType.INCOMING;
     private double lastTransactionAmount = 3000;
-    private static final SingletonBankAccountClass ISTANCE = new SingletonBankAccountClass();
+    private static SingletonBankAccountClass instance = null;
 
-    public static SingletonBankAccountClass getInstance(){
-        return SingletonBankAccountClass.ISTANCE;
+    /* Utilizzando la keyword "synchronized" ci assicuriamo che questa istanza Singleton sia anche thread safe */
+    public static synchronized SingletonBankAccountClass getInstance(){
+        if (instance == null)
+            instance = new SingletonBankAccountClass();
+        return SingletonBankAccountClass.instance;
     }
 
     /* Costruttore privato per non permettere l'istanziazione della classe dall'esterno */
-    private SingletonBankAccountClass(){}
+    private SingletonBankAccountClass(){
+        out.println("COSTRUTTORE DELLA CLASSE SINGLETON ESEGUITO");
+        /* Come si vedrà poi in fase di esecuzione, il costruttore stamperà questa stringa solo una volta
+        * perché viene eseguito solo la prima volta (la prima volta che viene chiamata la getInstance()) */
+    }
 
+    //getter del bilancio
     public double getBalance() {
         return balance;
     }
+
     public void printLastTransaction(){
         String messageOutput = """
                 Welcome %s, your last transaction was an %s transaction,
@@ -30,7 +39,8 @@ public class SingletonBankAccountClass {
     }
 
     public void doTransaction(TransactionType type, double amount){
-        if (type.equals(TransactionType.OUTGOING) && this.balance < amount){
+        if (type.equals(TransactionType.OUTGOING) && this.balance < amount){ //bilancio minore dell'operazione, che è in uscita,
+                                                                             //quindi non può essere permessa
             err.println("Your balance is too low for this operation");
             return;
         }
